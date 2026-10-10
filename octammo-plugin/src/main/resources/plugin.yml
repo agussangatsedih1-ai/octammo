@@ -1,0 +1,38 @@
+name: OctaMMO
+version: '${project.version}'
+main: io.octammo.OctaMMOPlugin
+api-version: '1.21'
+description: MMOItems add-on - item updates without revision ids and an Altar Forge upgrade station.
+softdepend: [MMOItems, MythicLib, Vault, PlaceholderAPI, Floodgate, WorldGuard, ExcellentEconomy]
+
+commands:
+  octammo:
+    description: OctaMMO main command
+    aliases: [octa, omm]
+    usage: /<command> [help|reload|update|upgrade|list|version]
+  itemupgrade:
+    description: Open an upgrade station (also reachable as /octammo:itemupgrade)
+    usage: /<command> [station] [path]
+
+permissions:
+  octammo.use:
+    description: Basic commands
+    default: true
+  octammo.update:
+    description: Use Item Update (manual and automatic) for your own items
+    default: op
+  octammo.update.others:
+    description: Update the items of other players
+    default: op
+  octammo.update.bypass:
+    description: Your items are never auto-updated
+    default: false
+  octammo.upgrade:
+    description: Open the upgrade GUI
+    default: true
+  octammo.upgrade.*:
+    description: Every station permission written as octammo.upgrade.<id>
+    default: false
+  octammo.admin:
+    description: Reload, list, open stations for others
+    default: op

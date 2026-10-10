@@ -1,0 +1,50 @@
+# Altar Forge layout (6 rows / 54 slots).
+#
+#       0   1   2   3   4   5   6   7   8
+# r0    .   .   .   .  INFO  .   .   .   .
+# r1    .   .   .  C1  C2  C3   .   .  SYR
+# r2    .   .   .  C4  IN  C5   >  OUT  .
+# r3    .   .   .  C6  C7  C8   .   %   .
+# r4   BACK  .  BST  .  GO   .  PRT  .   X
+# r5   P1  P2  P3  P4  P5  P6  P7  P8  P9
+#
+# Pure data: change slots / items / theme freely. Slots must be 0-53 and must not overlap.
+# A broken file is reported in the console and the built-in copy of this file is used instead.
+# Texts: {gui.some.key} is replaced by the language file, {station} / {path} / ... by the plugin,
+# %placeholders% by PlaceholderAPI.
+
+config-version: 2
+rows: 6                       # must be 6
+title: '&8Altar Forge &7» {station}'
+
+theme:
+  border: BLACK_STAINED_GLASS_PANE
+  filler: GRAY_STAINED_GLASS_PANE
+  shimmer-colors: [PURPLE_STAINED_GLASS_PANE, MAGENTA_STAINED_GLASS_PANE, PINK_STAINED_GLASS_PANE]
+
+slots:
+  info: 4
+  input: 22
+  rune-ring: [13, 21, 23, 31, 12, 14, 30, 32]   # order in which item costs fill the rune slots
+  output-preview: 25
+  requirements: 17
+  chance: 34
+  booster: 38
+  protection: 42
+  upgrade-button: 40
+  back: 36
+  cancel: 44
+  progress-bar: [45, 46, 47, 48, 49, 50, 51, 52, 53]
+  # Optional: one status pane per rune slot (same order as rune-ring), e.g. rune-status: [3, 5, ...]
+
+# Every item accepts: material, name, lore, glow, custom-model-data, item-model.
+# Anything you leave out falls back to the built-in default.
+items:
+  upgrade-button:
+    ready:      { material: LIME_CONCRETE, name: '{gui.upgrade.ready}', glow: true }
+    not-ready:  { material: RED_CONCRETE, name: '{gui.upgrade.not-ready}' }
+    animating:  { material: ORANGE_CONCRETE, name: '{gui.upgrade.animating}' }
+  rune-empty:    { material: LIGHT_GRAY_STAINED_GLASS_PANE, name: '{gui.rune.empty}' }
+  rune-missing:  { material: RED_STAINED_GLASS_PANE, name: ' ' }
+  rune-ok:       { material: LIME_STAINED_GLASS_PANE, name: ' ' }
+  rune-locked:   { material: BLACK_STAINED_GLASS_PANE, name: ' ' }

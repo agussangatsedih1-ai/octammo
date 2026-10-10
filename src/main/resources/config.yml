@@ -1,0 +1,50 @@
+# OctaMMO - main config
+# Language file from plugins/OctaMMO/lang/<code>.yml  (built-in: en, id)
+language: en
+
+modules:
+  item-update: true
+  item-upgrade: true
+
+upgrade:
+  # true  -> players also need octammo.upgrade.<file-name> for each file
+  per-file-permission: false
+  # Ask "are you sure?" (guis/confirm.yml) when a failure destroys the item and no protection item is inserted
+  confirm-destroy: true
+  # Creative players can duplicate items in custom GUIs, so they are refused by default
+  allow-creative: false
+
+# Loading animation shown when the upgrade button is pressed (title + subtitle 1% -> 100%)
+gui-animation:
+  enabled: true
+  duration-ticks: 100          # total duration 1% -> 100% (100 ticks = 5 seconds)
+  update-interval-ticks: 1     # how often percent / title are updated
+  title: ''                    # empty = lang key upgrade.animation.title
+  subtitle-format: '&e{percent}%'   # empty = lang key upgrade.animation.subtitle
+  progress-bar:
+    enabled: true
+    done-material: LIME_STAINED_GLASS_PANE
+    pending-material: GRAY_STAINED_GLASS_PANE
+    active-material: YELLOW_STAINED_GLASS_PANE
+  sound:
+    enabled: true
+    tick: BLOCK_NOTE_BLOCK_CHIME
+  idle-shimmer: true           # border colours wave while the GUI is idle (10 tick task, only while open)
+  close-after-result: false
+
+# Sounds: "entity.player.levelup" or "ENTITY_PLAYER_LEVELUP". Leave empty to disable one.
+sounds:
+  success: entity.player.levelup
+  fail: entity.item.break
+  update: entity.experience_orb.pickup
+  click: ui.button.click
+
+hooks:
+  floodgate:
+    # Bedrock players: a plain tap on an item in their own inventory moves it into the GUI
+    quick-place: true
+  worldguard:
+    # If not empty, upgrading is only allowed inside one of these regions (ids, lowercase)
+    allowed-regions: []
+    # Upgrading is never allowed inside these regions
+    blocked-regions: []

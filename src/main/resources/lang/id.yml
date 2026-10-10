@@ -1,0 +1,139 @@
+prefix: "&8[&bOcta&3MMO&8] &7"
+no-permission: "&cKamu tidak punya izin untuk itu."
+player-only: "&cHanya pemain yang bisa memakai perintah ini."
+player-not-found: "&cPemain tidak ditemukan: &f{player}"
+module-disabled: "&cModul ini dinonaktifkan."
+reloaded: "&aOctaMMO dimuat ulang. &7({files} file upgrade, {rules} aturan update)"
+version: "&7OctaMMO &f{version} &7- MMOItems: &f{mmoitems}"
+help:
+  - "&b/octammo reload &7- muat ulang config, lang, guis, updates, dan file upgrade"
+  - "&b/octammo update <player|all> &7- paksa scan update item"
+  - "&b/octammo upgrade <file> [player] &7- buka stasiun upgrade"
+  - "&b/octammo list &7- daftar file upgrade"
+  - "&b/itemupgrade <file> [path] &7- buka stasiun upgrade"
+
+update:
+  updated: "&f{count} &aitem milikmu diperbarui ke versi terbaru."
+  scanned: "&7Scan &f{player}&7: &f{count} &7item diperbarui."
+  scanned-all: "&7Scan &f{players} &7pemain: &f{count} &7item diperbarui."
+
+upgrade:
+  usage: "&cPenggunaan: &f/itemupgrade <file> [path]"
+  file-not-found: "&cFile upgrade tidak ditemukan: &f{file}"
+  path-not-found: "&cPath tidak ditemukan: &f{path}"
+  no-paths: "&cStasiun ini tidak punya path yang valid."
+  available: "&7File tersedia: &f{files}"
+  list-empty: "&7Belum ada file upgrade yang dimuat."
+  region-denied: "&cKamu tidak bisa upgrade item di area ini."
+  creative-denied: "&cUpgrade tidak tersedia di mode creative."
+  busy: "&cSebuah upgrade sedang berlangsung."
+  too-many-runes: "&cPath &f{path} &cbutuh slot rune lebih banyak dari GUI. Hubungi admin."
+  output-missing: "&cItem hasil &f{item} &ctidak ada di MMOItems. Hubungi admin."
+  payment-failed: "&cPembayaran gagal diproses."
+  pending-delivered: "&aHadiah upgrade yang tertunda sudah dikirim."
+  opened-for: "&7Membuka &f{file} &7untuk &f{player}&7."
+  success: "&a&lBERHASIL! &7Itemmu ter-upgrade menjadi &f{item}&7."
+  failed-keep: "&c&lGAGAL! &7Upgrade gagal, tapi itemmu aman."
+  failed-destroy: "&c&lGAGAL! &7Upgrade gagal dan itemmu hancur."
+  failed-protected: "&c&lGAGAL! &7Upgrade gagal, tapi proteksimu menyelamatkan item."
+  problem:
+    none: "&aSemua siap."
+    no-input: "&7Masukkan item yang mau di-upgrade."
+    runes: "&7Isi semua slot rune."
+    costs: "&7Kamu belum bisa membayar biaya lainnya."
+    economy: "&7Plugin ekonomi tidak tersedia."
+    permission: "&7Kamu tidak boleh memakai stasiun ini."
+    region: "&7Tidak diizinkan di area ini."
+  gui:
+    reject-input: "&cSlot ini hanya menerima &f{name}&c."
+    reject-rune: "&cSlot rune ini butuh &f{name}&c."
+    reject-booster: "&cItu bukan booster untuk stasiun ini."
+    reject-protection: "&cItu bukan item proteksi untuk stasiun ini."
+    reject-quick: "&cTidak ada slot di GUI yang menerima item itu."
+  animation:
+    title: "&6&lUpgrade Sedang Berlangsung!!"
+    subtitle: "&e{percent}%"
+    done-success: "&a&lUpgrade Berhasil!"
+    done-fail: "&c&lUpgrade Gagal"
+
+gui:
+  back: "&e<< Kembali"
+  cancel: "&cBatal"
+  close: "&cTutup"
+  upgrade:
+    ready: "&a&lUPGRADE"
+    ready-lore:
+      - "&7Semua sudah lengkap."
+      - "&eKlik untuk memulai upgrade."
+    not-ready: "&c&lBELUM SIAP"
+    not-ready-lore:
+      - "{reason}"
+    animating: "&6&lSEDANG UPGRADE..."
+  input:
+    empty: "&eItem yang di-upgrade"
+    empty-lore:
+      - "&7Taruh item yang ingin di-upgrade"
+      - "&7di slot ini."
+  rune:
+    empty: "&eSlot rune: &f{name}"
+    empty-lore:
+      - "&7Butuh: &f{required}x &7{name}"
+      - "&8Taruh itemnya di sini."
+  booster:
+    empty: "&bSlot booster"
+    empty-lore:
+      - "&7Opsional: menaikkan peluang berhasil."
+    locked: "&8Stasiun ini tidak punya booster"
+  protection:
+    empty: "&aSlot proteksi"
+    empty-lore:
+      - "&7Opsional: menyelamatkan itemmu jika"
+      - "&7kegagalan akan menghancurkannya."
+    locked: "&8Stasiun ini tidak punya proteksi"
+  requirements:
+    name: "&6Syarat"
+  costs:
+    none: "&7Tidak ada syarat."
+    progress: "{cost} &8({have}/{need})"
+    line-ok: "&a\u2714 &7{cost}"
+    line-missing: "&c\u2718 &7{cost}"
+  chance:
+    name: "&bPeluang berhasil"
+    lore:
+      - "&7Dasar: &f{base}%"
+      - "&7Booster: &a+{bonus}%"
+      - "&7Akhir: &e{percent}%"
+      - "{bar}"
+      - "&7Jika gagal: {fail}"
+  output:
+    footer:
+      - ""
+      - "&dHasil upgrade"
+    missing: "&cItem hasil tidak ada"
+  path:
+    info:
+      - "&7Pilih jalur upgrade."
+    entry-lore:
+      - "&7Butuh: &f{input}"
+      - "&7Menjadi: &f{output}"
+      - "&7Peluang: &e{chance}%"
+      - "&7Jika gagal: {fail}"
+      - "&7Biaya:"
+      - "{costs}"
+      - ""
+      - "&eKlik untuk membuka"
+  confirm:
+    title: "&c&lYakin?"
+    warning:
+      - "&7Jika upgrade ini gagal, itemmu"
+      - "&7akan &chancur&7."
+    accept: "&a&lYa, upgrade"
+    decline: "&c&lTidak, kembali"
+
+cost:
+  money: "Uang: {amount}"
+  levels: "{amount} level XP"
+  item: "{amount}x {name}"
+fail:
+  keep: "&aitemmu tetap aman"
+  destroy: "&citemmu hancur"

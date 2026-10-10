@@ -1,0 +1,29 @@
+name: OctaMMO
+version: '${project.version}'
+main: io.octammo.OctaMMO
+api-version: '1.21'
+description: MMOItems add-on - automatic item updates and GUI-based item upgrades.
+softdepend: [MMOItems, MythicLib, Vault, PlaceholderAPI, Floodgate, WorldGuard, ExcellentEconomy]
+
+commands:
+  octammo:
+    description: OctaMMO admin command
+    aliases: [octa]
+    usage: /<command> [help|reload|update|upgrade|list|version]
+  itemupgrade:
+    description: Open an item upgrade GUI (also reachable as /octammo:itemupgrade)
+    usage: /<command> <file>
+
+permissions:
+  octammo.admin:
+    description: Access to /octammo admin subcommands
+    default: op
+  octammo.upgrade:
+    description: Use the item upgrade GUI
+    default: true
+  octammo.upgrade.*:
+    description: Use every upgrade file (only checked if per-file-permission is enabled)
+    default: op
+  octammo.update.bypass:
+    description: Items are never auto-updated for this player
+    default: false

@@ -1,0 +1,41 @@
+# OctaMMO - Item Update module
+# Replaces outdated MMOItems in player inventories after a nerf/buff, without MMOItems' revision ID.
+# Free for the player: the item is removed and given again with the same amount.
+
+settings:
+  # COMMAND = run `command` as console (item lands in the first free slot)
+  # API     = build the item through the MMOItems API and put it in the SAME slot
+  method: COMMAND
+  command: "mmoitems give {type} {id} {player} {amount}"
+
+  notify-player: true
+  # Minimum time between automatic scans of the same player
+  scan-cooldown-ms: 3000
+  # Safety cap per scan
+  max-updates-per-scan: 40
+
+  triggers:
+    join: true
+    inventory-close: true
+    pickup: true
+    # Scan all online players every N seconds. 0 = off.
+    interval-seconds: 0
+
+  # Lore lines matching any of these regexes are ignored by compare-template
+  # (use this for lines containing random rolls).
+  ignore-lore-regex: []
+
+# Each entry says how to recognise an OUTDATED copy of one MMOItem.
+# type / id are the MMOItems TYPE and ID. "*" works as a wildcard (use together with compare-template).
+# Matching is done on lore text WITHOUT colour codes, case-insensitive.
+items:
+  corrupted-sword:
+    type: SWORD
+    id: CORRUPTED_SWORD
+    # outdated if ANY line contains one of these (old values)
+    outdated-lore-contains:
+      - "Attack Damage: 10"
+    # outdated if one of these is MISSING (new values)
+    required-lore-contains: []
+    # outdated if the lore differs from a freshly generated item
+    compare-template: false

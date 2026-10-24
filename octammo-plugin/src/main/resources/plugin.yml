@@ -25,6 +25,9 @@ permissions:
   octammo.upgrade.*:
     description: Every station permission written as octammo.upgrade.<id>
     default: false
+  octammo.interact.bypass:
+    description: MMOItems items may place and break blocks, till and make paths (for staff)
+    default: false
   octammo.admin:
     description: Reload, list, open stations for others
     default: op

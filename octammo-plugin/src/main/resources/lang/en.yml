@@ -1,4 +1,4 @@
-config-version: 4
+config-version: 5
 
 reloaded-ok: "{prefix} &aReloaded. &7({files} station(s))"
 plugin-description: "Altar Forge upgrade station for MMOItems."
@@ -22,6 +22,9 @@ no-permission: "{prefix} &cYou don't have permission to do that."
 player-only: "{prefix} &cOnly players can use this command."
 player-not-found: "{prefix} &cPlayer not found: &f{player}"
 module-disabled: "{prefix} &cThis module is disabled."
+interact:
+  blocked: "&c✘ &7MMOItems items cannot place or break blocks."
+
 upgrade:
   file-not-found: "{prefix} &cStation not found: &f{file}"
   path-not-found: "{prefix} &cPath not found: &f{path}"

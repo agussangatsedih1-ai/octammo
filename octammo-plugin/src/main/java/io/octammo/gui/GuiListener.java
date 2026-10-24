@@ -49,5 +49,6 @@ public final class GuiListener implements Listener {
     public void onQuit(PlayerQuitEvent e) {
         plugin.loading().handleQuit(e.getPlayer());
         plugin.upgrades().forget(e.getPlayer().getUniqueId());
+        if (plugin.interactLock() != null) plugin.interactLock().forget(e.getPlayer().getUniqueId());
     }
 }

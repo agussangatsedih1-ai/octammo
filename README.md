@@ -1,6 +1,6 @@
-# OctaMMO 1.0.3
+# OctaMMO 1.0.4
 
-Add-on MMOItems untuk **Paper 1.21.11** (Java 21, hanya pemain Java): stasiun upgrade **Altar Forge** (GUI 6 baris) dengan title loading 1% sampai 100%, plus API publik. Modul Item Update sudah dihapus.
+Add-on MMOItems untuk **Paper 1.21.11** (Java 21, hanya pemain Java): stasiun upgrade **Altar Forge** (GUI 6 baris) dengan title loading 1% sampai 100%, **kunci interaksi** untuk item MMOItems, plus API publik. Modul Item Update sudah dihapus.
 
 ## Struktur proyek
 
@@ -13,7 +13,7 @@ octammo-parent (pom)
 ## Instalasi
 
 1. Pasang **MMOItems** dan **MythicLib**. Tanpa keduanya plugin tetap load, modul upgrade nonaktif dan console menampilkan satu peringatan.
-2. Build dengan `mvn clean package` (atau GitHub Actions, lihat `.github/workflows/build.yml`). Hasil: `octammo-plugin/target/OctaMMO-1.0.3.jar`.
+2. Build dengan `mvn clean package` (atau GitHub Actions, lihat `.github/workflows/build.yml`). Hasil: `octammo-plugin/target/OctaMMO-1.0.4.jar`.
 3. Taruh jar di `plugins/`, restart. Soft-depend opsional: Vault, PlaceholderAPI, Floodgate, WorldGuard, Excellent Economy (lewat Vault).
 
 Setelah update plugin, key config baru ditambahkan otomatis tanpa menyentuh nilaimu; file lama disalin ke `backups/`. File di `guis/`, `upgrades/`, serta key yang **diganti nama** di `lang/` tidak ikut diperbarui otomatis. Hapus `guis/default-upgrade.yml` dan folder `lang/` (setelah dibackup) supaya dibuat ulang dengan tombol dan teks terbaru.
@@ -27,10 +27,25 @@ Setelah update plugin, key config baru ditambahkan otomatis tanpa menyentuh nila
 | `/octammo upgrade [station] [player] [path]`, `/itemupgrade [station] [path]`, `/octammo:itemupgrade` | `octammo.upgrade` | semua |
 | `/octammo reload`, `/octammo list`, buka untuk pemain lain | `octammo.admin` | op |
 | izin per stasiun | isi `permission:` di file stasiun | tidak ada |
+| item MMOItems boleh place/break/cangkul/sekop (untuk staf) | `octammo.interact.bypass` | tidak ada, OP pun tidak |
 
 Alias: `/octa`, `/omm`. `/itemupgrade` tanpa argumen membuka daftar stasiun yang boleh diakses pemain.
 
 `/octammo ver` menampilkan pembuat (dari `plugin.yml`: Alvran, Robozat and Team), versi plugin, dan deskripsi (dari `lang/*.yml`, key `plugin-description`).
+
+## Kunci interaksi item MMOItems (1.0.4)
+
+Item MMOItems apa pun (block penuh, bukan block penuh, bibit, kepala, dan seterusnya), di tangan utama maupun offhand, **tidak bisa**:
+
+1. **Memasang** apa pun: blok (`BlockPlaceEvent`), item frame dan painting, boat, minecart, armor stand, end crystal, dan menuang ember.
+2. **Menghancurkan blok** (item di tangan utama).
+3. **Cangkul membuat farmland** dan 4. **sekop membuat grass path** (hanya pemakaian item yang ditolak lewat `PlayerInteractEvent`).
+
+Yang tetap bisa: membuka chest, anvil, meja kerja (cartography table, smoker, blast furnace, stonecutter, dan lain-lain), pintu, gate, dan memasukkan item ke item frame, karena itu interaksi blok/entity yang tidak dibatalkan. **Shift + klik kanan tetap terblokir**: vanilla melewati interaksi blok saat sneak lalu mencoba memasang item, dan pemasangan itu yang dibatalkan.
+
+Pengaturan di `interact-lock:` (`config.yml`): `enabled`, `block-place`, `block-break`, `hoe-farmland`, `shovel-path`, `other-placement`, `notify` (pesan action bar, paling sering sekali per detik). Staf yang diberi `octammo.interact.bypass` tidak terpengaruh. Fitur ini mati otomatis bila MMOItems tidak terpasang.
+
+Catatan: ini juga menghentikan fitur custom block bawaan MMOItems (penempatan blok kustom). Cangkul/sekop MMOItems tidak bisa dipakai di blok yang bisa dicangkul/diratakan, jadi skill klik kanan yang mengandalkan klik di blok tersebut ikut tertahan.
 
 ## Altar Forge
 

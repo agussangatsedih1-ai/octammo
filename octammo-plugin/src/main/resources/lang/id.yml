@@ -1,4 +1,4 @@
-config-version: 4
+config-version: 5
 
 reloaded-ok: "{prefix} &aDimuat ulang. &7({files} stasiun)"
 plugin-description: "Stasiun upgrade Altar Forge untuk MMOItems."
@@ -22,6 +22,9 @@ no-permission: "{prefix} &cKamu tidak punya izin untuk itu."
 player-only: "{prefix} &cHanya pemain yang bisa memakai perintah ini."
 player-not-found: "{prefix} &cPemain tidak ditemukan: &f{player}"
 module-disabled: "{prefix} &cModul ini dinonaktifkan."
+interact:
+  blocked: "&c✘ &7Item MMOItems tidak bisa dipakai untuk memasang atau menghancurkan blok."
+
 upgrade:
   file-not-found: "{prefix} &cStasiun tidak ditemukan: &f{file}"
   path-not-found: "{prefix} &cPath tidak ditemukan: &f{path}"

@@ -15,6 +15,7 @@ import io.octammo.hook.EconomyHook;
 import io.octammo.hook.FloodgateHook;
 import io.octammo.hook.PapiHook;
 import io.octammo.hook.WorldGuardHook;
+import io.octammo.interact.InteractLockListener;
 import io.octammo.upgrade.CostService;
 import io.octammo.upgrade.ExtensionRegistry;
 import io.octammo.upgrade.LoadingLockListener;
@@ -48,6 +49,7 @@ public final class OctaMMOPlugin extends JavaPlugin {
     private AuditLog upgradeLog;
     private ExecutorService io;
     private OctaMMOApi api;
+    private InteractLockListener interactLock;
     private boolean mmoItems;
 
     // optional hooks, null when the plugin is not installed
@@ -101,6 +103,10 @@ public final class OctaMMOPlugin extends JavaPlugin {
 
         pm.registerEvents(new GuiListener(this), this);
         pm.registerEvents(new LoadingLockListener(this), this);
+        if (mmoItems) {
+            interactLock = new InteractLockListener(this);
+            pm.registerEvents(interactLock, this);
+        }
 
         PluginCommand octa = getCommand("octammo");
         if (octa != null) {
@@ -167,6 +173,7 @@ public final class OctaMMOPlugin extends JavaPlugin {
     }
 
     public boolean mmoItems() { return mmoItems; }
+    public InteractLockListener interactLock() { return interactLock; }
     public Lang lang() { return lang; }
     public PlayerStats stats() { return stats; }
     public UpgradeManager upgrades() { return upgrades; }

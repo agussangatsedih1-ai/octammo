@@ -1,7 +1,7 @@
-# OctaMMO 1.0.3 - main config
+# OctaMMO 1.0.4 - main config
 # Missing keys are added automatically after an update (your values are never touched,
 # the old file is copied to backups/ first).
-config-version: 4
+config-version: 5
 
 # en | id  (files in plugins/OctaMMO/lang/, any key missing in id.yml falls back to en.yml)
 language: en
@@ -15,6 +15,22 @@ prefix: '&8[&x&F&F&0&0&0&0&lO&x&F&4&0&0&2&B&lc&x&E&9&0&0&5&5&lt&x&D&F&0&0&8&0&la
 
 modules:
   item-upgrade: true
+
+# --------------------------------------------------------------------------- Interact lock
+# MMOItems items cannot place blocks, break blocks, till farmland (hoe) or make dirt paths (shovel),
+# in the main hand or the offhand. Opening chests, anvils, workbenches (cartography table, smoker, blast furnace,
+# stonecutter, ...), doors, gates and putting items in item frames still work.
+# Sneaking + right click is blocked too: vanilla then tries to place the item, and that placement is cancelled.
+# Staff can be exempted with the permission octammo.interact.bypass (nobody has it by default, not even OPs).
+# NOTE: this also stops MMOItems' own custom block placement.
+interact-lock:
+  enabled: true
+  block-place: true
+  block-break: true         # the item in the main hand
+  hoe-farmland: true
+  shovel-path: true
+  other-placement: true     # item frames, paintings, boats, minecarts, armor stands, end crystals, buckets
+  notify: true              # action bar message, at most once per second
 
 # --------------------------------------------------------------------------- Item Upgrade
 upgrade:

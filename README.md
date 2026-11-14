@@ -229,3 +229,18 @@ The GitHub Actions workflow runs `mvn -B clean test package` on pushes and pull 
 - [AdvancedEnchantments — Custom Targets](https://ae.advancedplugins.net/for-developers/create-custom-effects-2)
 - [AdvancedEnchantments — Plugin Compatibility Issues](https://ae.advancedplugins.net/for-developers/plugin-compatiblity-issues)
 - [ExcellentEconomy — Developer API](https://nightexpressdev.com/excellenteconomy/utility/developer-api/)
+
+
+## Feature GUI configuration
+
+The following files are generated in `plugins/OctaMMO/guis/` and can be edited without rebuilding the plugin:
+
+- `enchanting.yml` — title, glass-pane decoration, input/control slots, and enchantment grid slots.
+- `item-fixer.yml` — title, glass-pane decoration, and input/action slots.
+- `default-upgrade.yml`, `path-select.yml`, and `confirm.yml` — Altar Forge layouts.
+
+All slot values use the Bukkit inventory index range `0-53`. Keep interactive slots unique and do not overlap the enchantment grid with the control slots.
+
+The enchanting input supports normal cursor placement, drag-and-drop into the configured input slot, shift-click from the player inventory, number-key swaps, and offhand swaps. Search is entered in chat after clicking the search icon.
+
+Enchantment entries are checked against the inserted item's Bukkit material and, when MMOItems is installed, its MMOItems `TYPE/ID`. Incompatible entries are shown in red and cannot be applied. Vanilla enchantment conflicts are checked using Bukkit's enchantment conflict rules; AdvancedEnchantments conflicts are read from each enchantment's `conflicts` setting when present.

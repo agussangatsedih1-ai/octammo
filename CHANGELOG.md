@@ -37,3 +37,15 @@
 - AdvancedEnchantments extraction uses an ItemStack-based getter if the installed build exposes one and otherwise falls back to matching configured enchantment IDs/display names against item lore. Validate extraction against the exact AdvancedEnchantments build installed on the server.
 - Extracted custom enchant books are created as `ENCHANTED_BOOK` items using `AEAPI.applyEnchant`, matching the standard AdvancedEnchantments custom-book item type.
 - Run a staging-server test before production deployment.
+
+
+## 1.2.0-SNAPSHOT — GUI interaction and compatibility hotfix
+
+- Fixed cursor handling for input slots by using the active InventoryView cursor instead of deprecated event cursor mutation.
+- Added controlled drag-and-drop insertion into the configured input slot; decorative and action slots remain protected.
+- Added number-key and offhand input swapping, plus safe outside-click handling.
+- Added cyan/purple stained-glass GUI frames to Enchanting, Enchantment Guide, and Item Fixer.
+- Moved Enchanting and Item Fixer titles, decoration, and slot layouts into `guis/enchanting.yml` and `guis/item-fixer.yml`.
+- Added MMOItems TYPE/ID-aware AdvancedEnchantments `applies` matching and visible item identity information.
+- Incompatible enchantments now appear red and cannot be applied; vanilla conflicts use Bukkit conflict rules and AE conflicts use configured `conflicts` lists.
+- Added safer parsing for both list and comma-separated AdvancedEnchantments conflict definitions.

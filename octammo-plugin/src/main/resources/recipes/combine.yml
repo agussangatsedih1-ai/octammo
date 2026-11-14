@@ -1,0 +1,26 @@
+# OctaMMO Combine Station recipes.
+# A recipe may contain up to six ingredients. Each ingredient occupies one input slot.
+# Supported ingredient types: MATERIAL and MMOITEMS.
+# Supported result types: MATERIAL and MMOITEMS.
+# Edit this file to match the item IDs configured on your server.
+recipes: {}
+
+# Example MMOItems recipe:
+# recipes:
+#   reforged_blade:
+#     name: "Reforged Blade"
+#     description:
+#       - "Combine two fragments into a new weapon."
+#     ingredients:
+#       - type: MMOITEMS
+#         item-type: SWORD
+#         item-id: BLADE_FRAGMENT
+#         amount: 2
+#       - type: MATERIAL
+#         material: NETHERITE_INGOT
+#         amount: 1
+#     result:
+#       type: MMOITEMS
+#       item-type: SWORD
+#       item-id: REFORGED_BLADE
+#       amount: 1

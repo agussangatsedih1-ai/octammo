@@ -1,134 +1,225 @@
-# OctaMMO 1.0.4
+# OctaMMO 1.2.0-SNAPSHOT
 
-Add-on MMOItems untuk **Paper 1.21.11** (Java 21, hanya pemain Java): stasiun upgrade **Altar Forge** (GUI 6 baris) dengan title loading 1% sampai 100%, **kunci interaksi** untuk item MMOItems, plus API publik. Modul Item Update sudah dihapus.
+OctaMMO is a modular Paper plugin for MMOItems servers. Version `1.2.0-SNAPSHOT` expands the original Altar Forge and public API with a custom enchanting interface, recipe-driven Combine and Crafting Stations, and an MMOItems Item Fixer.
 
-## Struktur proyek
+## Compatibility
 
-```
-octammo-parent (pom)
- ├─ octammo-api      interface + event saja (compileOnly untuk developer lain)
- └─ octammo-plugin   implementasi, jar plugin sudah menyertakan class API
-```
-
-## Instalasi
-
-1. Pasang **MMOItems** dan **MythicLib**. Tanpa keduanya plugin tetap load, modul upgrade nonaktif dan console menampilkan satu peringatan.
-2. Build dengan `mvn clean package` (atau GitHub Actions, lihat `.github/workflows/build.yml`). Hasil: `octammo-plugin/target/OctaMMO-1.0.4.jar`.
-3. Taruh jar di `plugins/`, restart. Soft-depend opsional: Vault, PlaceholderAPI, Floodgate, WorldGuard, Excellent Economy (lewat Vault).
-
-Setelah update plugin, key config baru ditambahkan otomatis tanpa menyentuh nilaimu; file lama disalin ke `backups/`. File di `guis/`, `upgrades/`, serta key yang **diganti nama** di `lang/` tidak ikut diperbarui otomatis. Hapus `guis/default-upgrade.yml` dan folder `lang/` (setelah dibackup) supaya dibuat ulang dengan tombol dan teks terbaru.
-
-## Command dan permission
-
-| Command | Permission | Default |
-|---|---|---|
-| `/octammo help` | `octammo.use` | semua |
-| `/octammo version` atau `/octammo ver` | tanpa permission | semua |
-| `/octammo upgrade [station] [player] [path]`, `/itemupgrade [station] [path]`, `/octammo:itemupgrade` | `octammo.upgrade` | semua |
-| `/octammo reload`, `/octammo list`, buka untuk pemain lain | `octammo.admin` | op |
-| izin per stasiun | isi `permission:` di file stasiun | tidak ada |
-| item MMOItems boleh place/break/cangkul/sekop (untuk staf) | `octammo.interact.bypass` | tidak ada, OP pun tidak |
-
-Alias: `/octa`, `/omm`. `/itemupgrade` tanpa argumen membuka daftar stasiun yang boleh diakses pemain.
-
-`/octammo ver` menampilkan pembuat (dari `plugin.yml`: Alvran, Robozat and Team), versi plugin, dan deskripsi (dari `lang/*.yml`, key `plugin-description`).
-
-## Kunci interaksi item MMOItems (1.0.4)
-
-Item MMOItems apa pun (block penuh, bukan block penuh, bibit, kepala, dan seterusnya), di tangan utama maupun offhand, **tidak bisa**:
-
-1. **Memasang** apa pun: blok (`BlockPlaceEvent`), item frame dan painting, boat, minecart, armor stand, end crystal, dan menuang ember.
-2. **Menghancurkan blok** (item di tangan utama).
-3. **Cangkul membuat farmland** dan 4. **sekop membuat grass path** (hanya pemakaian item yang ditolak lewat `PlayerInteractEvent`).
-
-Yang tetap bisa: membuka chest, anvil, meja kerja (cartography table, smoker, blast furnace, stonecutter, dan lain-lain), pintu, gate, dan memasukkan item ke item frame, karena itu interaksi blok/entity yang tidak dibatalkan. **Shift + klik kanan tetap terblokir**: vanilla melewati interaksi blok saat sneak lalu mencoba memasang item, dan pemasangan itu yang dibatalkan.
-
-Pengaturan di `interact-lock:` (`config.yml`): `enabled`, `block-place`, `block-break`, `hoe-farmland`, `shovel-path`, `other-placement`, `notify` (pesan action bar, paling sering sekali per detik). Staf yang diberi `octammo.interact.bypass` tidak terpengaruh. Fitur ini mati otomatis bila MMOItems tidak terpasang.
-
-Catatan: ini juga menghentikan fitur custom block bawaan MMOItems (penempatan blok kustom). Cangkul/sekop MMOItems tidak bisa dipakai di blok yang bisa dicangkul/diratakan, jadi skill klik kanan yang mengandalkan klik di blok tersebut ikut tertahan.
-
-## Altar Forge
-
-Satu file di `upgrades/` = satu **stasiun**; tiap entri di `paths:` = satu **path**. Lihat `upgrades/example-sword.yml` (lengkap, ber-komentar). Stasiun dengan banyak path menampilkan menu path (`guis/path-select.yml`).
-
-```
-      0     1    2    3    4     5   6    7   8
-r0    BACK  ▒    ▒    ▒    INFO  ▒   ▒    ▒   X
-r1    ▒     ▒    ▒    C1   C2    C3  ▒    ▒   SYR
-r2    ▒     ▒    FILL C4   IN    C5  AMT  OUT ▒
-r3    ▒     ▒    ▒    C6   C7    C8  ▒    %   ▒
-r4    ▒     BST1 BST2 BST3 GO    ▒   PRT  ▒   ▒
-r5    G1    G2   G3   G4   G5    G6  G7   G8  G9
-```
-
-- **IN** hanya menerima TYPE/ID path itu. **C1-C8** aktif sebanyak slot yang dibutuhkan cost berbentuk item (satu cost besar dipecah ke beberapa slot sesuai ukuran stack). Slot kosong menampilkan placeholder (bertanda PDC `octammo:virtual`, tidak bisa diambil atau dishift-click).
-- **FILL** (tombol isi otomatis): memindahkan item yang diupgrade dan semua material yang dibutuhkan dari inventory ke slot, persis sebanyak yang diperlukan. Booster dan proteksi tidak diisi otomatis. Kalau bahan kurang, pesan menyebut apa yang kurang.
-- **AMT** (tombol jumlah result): klik kiri menambah satu langkah, klik kanan mengurangi, shift-klik kembali ke default. Langkahnya adalah jumlah default di file: `amount: 1` menjadi 1, 1+1, 1+1+1; `amount: 2` menjadi 2, 2+2, 2+2+2.
-  - Secara default input, cost item, uang, dan level ikut dikalikan, dan **satu roll** menentukan seluruh batch. `output.scale-costs: false` hanya mengalikan result (pengali gratis, hati-hati).
-  - Batas tertinggi: `upgrade.max-multiplier` di config (atau `output.max-multiplier` per path), ukuran stack item input, dan jumlah slot rune. Path dengan cost `CUSTOM` tidak bisa dikalikan.
-  - Item di slot rune yang tidak cocok lagi setelah jumlah diganti dikembalikan ke pemain.
-- **SYR** = checklist requirement dan cost dengan tanda hijau/merah. **%** = chance akhir. **OUT** = preview hasil (jumlahnya ikut berubah). **GO** merah sampai semua syarat terpenuhi.
-- **G1-G9** = gauge chance statis: merah di bawah 30%, kuning 30-70%, hijau di atas 70%.
-- **BST** = booster, **PRT** = proteksi (opsional, didefinisikan di path).
-- Tombol FILL dan AMT opsional di layout (`slots.autofill`, `slots.amount`); hapus dari `guis/*.yml` untuk menyembunyikannya.
-- Layout, tema, material, `item-model`, `custom-model-data` ada di `guis/*.yml`; file rusak dilaporkan (file, key, nilai) dan diganti layout bawaan.
-- Gaya teks GUI: hanya judul ikon yang bold, lore memakai warna dan simbol saja.
-
-### Proses upgrade
-
-1. GO ditekan: sesi dikunci, semua syarat dicek ulang, uang/level dikonsumsi, **chance di-roll sekali**.
-2. GUI dikosongkan dan **ditutup**. Hasil dan semua item yang kembali disimpan di sesi dan di `pending-rewards/` (ditulis async).
-3. Title `Upgrade Sedang Berlangsung!!` dan subtitle `1%` sampai `100%`. **Satu task global** untuk semua pemain, hanya hidup selama ada sesi, title dikirim hanya saat persen berubah (`percent-step` mengurangi paket).
-4. Pemain dikunci: slowness dan jump negatif (tanpa listener gerak), invulnerable, command/interact/inventory/drop/combat dibatalkan (`upgrade-loading.lock.*`).
-5. Di 100%: item diberikan, efek `on-success` / `on-fail-effects` jalan, `logs/upgrades.log` ditulis, event ditembakkan, title hasil tampil, GUI dibuka lagi dalam keadaan kosong.
-
-Pemain disconnect, server stop, atau plugin disable saat loading: hasil diberikan seketika. Bila pemain tidak online, file `pending-rewards` dikirim saat join berikutnya.
-
-### Format path
-
-| Bagian | Isi |
+| Component | Requirement |
 |---|---|
-| `requirements` | `level >= 30`, `permission node`, `placeholder %x% >= 30` (PlaceholderAPI), atau requirement dari plugin lain |
-| `input` | `type`, `id`, `amount`, `consume` |
-| `costs` (`kind`) | `MMOITEMS` dan `VANILLA` (masuk slot rune), `MONEY` (Vault, Excellent Economy lewat Vault), `LEVELS`, `CUSTOM` / `COMMAND_CHECK` (lewat API) |
-| `output` | `mode: SINGLE` atau `WEIGHTED`; `results` (`type`, `id`, `amount`, `weight`, `preserve`); `scale-costs`; `max-multiplier` |
-| `chance` | `base`, `max-total`, `booster-slots` (0-3), `booster-consume`, `boosters` |
-| `on-fail` | `input`: `KEEP`/`CONSUME`/`DOWNGRADE`/`BREAK`; `costs`: `CONSUME`/`REFUND`/`PARTIAL`; `refund-percent`; `protection`; `downgrade` |
-| `on-success`, `on-fail-effects` | `commands` (`console:` atau `player:`), `sound`, `title`, `broadcast`, `effects` (API) |
-| stasiun | `display-name`, `permission`, `gui`, `cooldown`, `worlds-blacklist`, `worldguard-regions-blacklist`, `loading.duration-ticks` |
+| Minecraft server | Paper 1.21.11 |
+| Java runtime | Java 21 |
+| MMOItems | Required for Altar Forge, MMOItems recipe ingredients/results, and Item Fixer |
+| MythicLib | Required by MMOItems integration |
+| AdvancedEnchantments | Optional; required for custom-enchantment browsing, application, and extraction |
+| ExcellentEconomy | Optional; required only by recipes that charge a configured ExcellentEconomy currency |
+| Vault | Optional; continues to support the existing Altar Forge money cost |
+| PlaceholderAPI | Optional |
+| WorldGuard | Optional |
+| Floodgate | Optional; Bedrock players are not supported by the custom GUI flows |
 
-Booster bertumpuk: `chance = min(max-total, base + jumlah(add × jumlah item))`. Contoh base 75 dengan +10 per item: 85%, 95%, 100%. Hanya item yang dihitung (maksimal `max-items`) yang dikonsumsi.
+Optional integrations are loaded through soft dependencies or reflection. OctaMMO can still start when AdvancedEnchantments or ExcellentEconomy is not installed; the related features will report that the integration is unavailable when used.
 
-`preserve` di result menyalin NBT mentah dari item input (best effort, lore dan stat tidak dihitung ulang). Kosongkan bila ragu.
+## Build
 
-## Placeholder (PlaceholderAPI)
+Requirements: JDK 21 and Apache Maven 3.9 or newer.
 
-`%octammo_upgrades_done%`, `%octammo_upgrades_success%`, `%octammo_upgrades_failed%`, `%octammo_can_upgrade_<id>%`.
-
-## API (versi 2)
-
-Gunakan sebagai `compileOnly` (`mvn install` di `octammo-api`) dan `softdepend: [OctaMMO]`.
-
-```java
-OctaMMOApi api = OctaMMO.getApi();   // io.octammo.api.OctaMMO, atau Bukkit.getServicesManager().load(OctaMMOApi.class)
-api.openStation(player, "example-sword");
-api.attemptUpgrade(player, new UpgradeContext("example-sword", "tier-2"));   // tanpa GUI, item diambil dari inventory
-api.isUpgrading(player);
+```bash
+mvn -B clean test package
 ```
 
-Event: `UpgradeStationOpenEvent` (cancel), `UpgradePreEvent` (cancel, `setChance`, `getBoosterBonus`), `UpgradeLoadingStartEvent` (cancel, ubah `durationTicks`), `UpgradeLoadingEndEvent`, `UpgradeResultEvent`, `UpgradeCloseEvent`. Method dan event Item Update dari API versi 1 sudah dihapus.
+The plugin jar is generated at:
 
-```java
-api.registerCostType(new CostType() {
-    public String id() { return "my-points"; }
-    public boolean has(Player p, ConfigurationSection cfg) { return MyPoints.get(p) >= cfg.getInt("amount"); }
-    public void take(Player p, ConfigurationSection cfg) { MyPoints.take(p, cfg.getInt("amount")); }
-});
+```text
+octammo-plugin/target/OctaMMO-1.2.0-SNAPSHOT.jar
 ```
-YAML: `- { kind: CUSTOM, id: my-points, amount: 100 }`.
 
-## Keterbatasan
+The jar shades the `octammo-api` module. The API classes are included in the plugin jar and are not shaded from third-party plugins.
 
-- Excellent Economy dipakai lewat Vault; mata uang ganda native belum ada.
-- `min-upgrade-level` di `input` belum didukung.
-- Struktur package belum dipecah sesuai usulan (`core`, `upgrade`, `gui`, `hook`, `command`, `util`).
+## Installation
+
+1. Install Paper 1.21.11 and Java 21.
+2. Install MMOItems and MythicLib for MMOItems functionality.
+3. Optionally install AdvancedEnchantments and/or ExcellentEconomy before OctaMMO.
+4. Place `OctaMMO-1.2.0-SNAPSHOT.jar` in the server's `plugins` directory and restart.
+5. Review `plugins/OctaMMO/config.yml`, `recipes/combine.yml`, and `recipes/crafting.yml`.
+6. Restart or run `/octammo reload` after editing plugin configuration files.
+
+The first start creates the default configuration, GUI layouts, language file, and recipe files. Existing config values are retained during migration; newly introduced keys are appended and the previous file is backed up under `plugins/OctaMMO/backups/`.
+
+**Language files are English-only in this release.** If you are upgrading from an older version, change `language: en` in `config.yml`. The old `lang/id.yml` file is no longer used.
+
+## Commands and permissions
+
+| Command | Permission | Default | Description |
+|---|---|---:|---|
+| `/octammo help` | `octammo.use` | true | Show command help |
+| `/octammo version` | none | all | Show plugin version and authors |
+| `/octammo reload` | `octammo.admin` | op | Reload supported configuration files |
+| `/octammo list` | `octammo.admin` | op | List Altar Forge stations |
+| `/octammo upgrade [station] [player] [path]` | `octammo.upgrade` | true | Open an Altar Forge station |
+| `/itemupgrade [station] [path]` | `octammo.upgrade` | true | Shortcut for Altar Forge |
+| `/octammo combine` | `octammo.combine` | true | Open the Combine Station |
+| `/octammo crafting` | `octammo.crafting` | true | Open the Crafting Station |
+| `/octammo fixer` | `octammo.fixer` | op | Open the MMOItems Item Fixer |
+| `/octammo enchanting` | `octammo.enchant` | true | Open the custom enchanting GUI |
+
+Right-clicking an enchanting table also opens the custom enchanting GUI when `modules.custom-enchanting` is enabled. The aliases `/octa` and `/omm` are available for `/octammo`.
+
+Additional permissions:
+
+- `octammo.upgrade.<station-id>` can be required per station when `upgrade.require-station-permission` is enabled.
+- `octammo.upgrade.*` is available for permission managers that grant all station permissions.
+- `octammo.interact.bypass` bypasses the MMOItems interaction lock.
+
+## Modules
+
+### 1. Altar Forge — Item Upgrade
+
+The existing 54-slot Altar Forge, configurable stations and paths, upgrade requirements, runes, boosters, protection items, result chances, loading sequence, pending rewards, audit log, and public API are retained.
+
+- One YAML file in `upgrades/` defines a station; each `paths:` entry defines a path.
+- See `upgrades/example-sword.yml` for the supported station schema.
+- GUI layouts are located in `guis/`.
+- Item-upgrade behavior is enabled by `modules.item-upgrade`.
+
+The existing public API remains at API version 2. Existing integrations using `OctaMMO.getApi()` or the Bukkit Services Manager can continue to use the published API types.
+
+### 2. Custom Enchanting
+
+When enabled, interacting with an enchanting table opens a six-row, 54-slot OctaMMO GUI. The input slot is on the left; enchantment entries are displayed on the right. The bottom row contains tier shortcuts for:
+
+- Vanilla
+- Simple
+- Unique
+- Elite
+- Ultimate
+- Legendary
+- Fabled
+
+Vanilla enchantments are discovered through the Bukkit enchantment registry and filtered by `Enchantment.canEnchantItem` for the inserted item. AdvancedEnchantments definitions are read recursively from the plugin's `Enchantments/`, `enchantments/`, or `enchants/` folders, including the modern `Enchantments/<folder>/enchantments.yml` layout. Definitions are grouped by their configured `group` value and filtered against each enchantment's `applies` material/category list (including shortcuts such as `ALL_SWORD` and `ALL_ARMOR`). The GUI tiers therefore need to match the group names configured on your AE enchantments (for example `SIMPLE`, `UNIQUE`, `ELITE`, `ULTIMATE`, `LEGENDARY`, and `FABLED`). Custom enchantments are applied through the documented `AEAPI.applyEnchant(String, int, ItemStack)` method.
+
+Normal click applies level I. Shift-click applies the configured maximum level. Enchanting takes one item per operation; stackable inputs are split so XP is never charged for an entire stack at once. Costs are charged in player experience levels:
+
+```yaml
+enchanting:
+  costs:
+    vanilla-per-level: 1
+    advanced:
+      simple: 2
+      unique: 3
+      elite: 4
+      ultimate: 5
+      legendary: 6
+      fabled: 8
+```
+
+Changing enchantment definitions or AE configuration requires `/octammo reload` or a restart. The GUI only lists an enchantment group when the item is inserted. Vanilla applicability is checked by Bukkit. AdvancedEnchantments applicability remains governed by the installed AE configuration and its own API behavior.
+
+### 3. Combine Station
+
+Open with `/octammo combine`. Recipes are declared in `recipes/combine.yml`. A recipe may use up to six input slots and can consume vanilla materials, MMOItems identified by `TYPE/ID`, or a mixture of both. The recipe result can also be a vanilla material or an MMOItem.
+
+Example:
+
+```yaml
+recipes:
+  reforged_blade:
+    name: "Reforged Blade"
+    description:
+      - "Combine two fragments into a new weapon."
+    ingredients:
+      - type: MMOITEMS
+        item-type: SWORD
+        item-id: BLADE_FRAGMENT
+        amount: 2
+      - type: MATERIAL
+        material: NETHERITE_INGOT
+        amount: 1
+    result:
+      type: MMOITEMS
+      item-type: SWORD
+      item-id: REFORGED_BLADE
+      amount: 1
+```
+
+Replace the sample Type and Item ID values with IDs that exist on your server. The shipped `combine.yml` intentionally contains no active MMOItems recipe so it does not assume your server's item IDs.
+
+### 4. Crafting Station
+
+Open with `/octammo crafting`. Recipes are declared in `recipes/crafting.yml` and use the same ingredient/result format as Combine. Each crafting recipe may also charge a native ExcellentEconomy currency:
+
+```yaml
+currency:
+  id: octacoin
+  amount: 1000
+```
+
+`id` must be the actual ExcellentEconomy currency ID, not its display name or symbol. OctaMMO uses ExcellentEconomy's service API and currency-specific `getBalance(Player, String)` / `withdraw(Player, String, double)` operations. It does not route these recipe costs through Vault's primary economy provider.
+
+The included `example_netherite_blade` recipe is a sample. Change the currency ID and amount to match your economy, or remove the recipe. If the currency is not registered or the provider is unavailable, the craft is refused and the ingredients are not consumed.
+
+### 5. MMOItems Item Fixer
+
+Open with `/octammo fixer`. The GUI provides two operations:
+
+**Extract AE Enchants**
+
+- Requires an MMOItems item and an active AdvancedEnchantments integration.
+- Attempts to read the custom enchant map from an ItemStack-based public AE API getter. If the installed AE API does not expose such a getter, the fixer falls back to matching the enchant definition names/IDs against item lore.
+- Rebuilds the base MMOItems template from the original `MMOITEMS_ITEM_TYPE` and `MMOITEMS_ITEM_ID` tags.
+- Creates one AdvancedEnchantments enchanted book per detected enchantment, applying the enchantment through AEAPI to an enchanted-book stack.
+- Does not consume the input if the item, enchantments, template, or book output cannot be prepared.
+
+**Rebuild Item Lore**
+
+- Rebuilds the original base template using the MMOItems Type and Item ID.
+- Restores vanilla enchantments, and readable AdvancedEnchantments enchantments when AE is available.
+- Refuses to rebuild when AdvancedEnchantments is installed but its enchantment definitions could not be loaded, to avoid silently stripping known custom-enchantment data.
+- Intended for restoring a consistent base item after lore corruption, such as a gemstone removal operation.
+
+**Important data behavior:** the MMOItems API exposes a reliable way to create a fresh template from Type/ID, but this operation is not a full serialization restore of the original instance. Rebuilding the item resets randomized stats, gems/socket contents, custom upgrade state, durability, and other per-instance data unless they are recreated by MMOItems itself. Test this on copies before enabling the fixer for players. The fixer processes one item at a time to avoid ambiguous multi-stack extraction.
+
+### 6. MMOItems Interaction Lock
+
+When enabled, the interaction listener prevents MMOItems items in the main/off hand from placing blocks, breaking blocks, tilling farmland, or creating dirt paths. The behavior is controlled by `interact-lock:` in `config.yml`; players with `octammo.interact.bypass` are exempt.
+
+## Configuration files
+
+| File | Purpose |
+|---|---|
+| `config.yml` | Module toggles, enchanting costs, fixer behavior, interaction lock, Altar Forge settings |
+| `lang/en.yml` | English chat messages and GUI text |
+| `guis/*.yml` | Existing Altar Forge GUI layouts |
+| `recipes/combine.yml` | Combine recipes |
+| `recipes/crafting.yml` | Crafting recipes and currency costs |
+| `upgrades/*.yml` | Altar Forge stations and paths |
+
+All shipped configuration comments, messages, GUI labels, lore, and documentation are in English.
+
+## Developer API
+
+The public API is provided by the `octammo-api` Maven module and is included in the plugin jar. For another plugin project, install the API module locally:
+
+```bash
+mvn -pl octammo-api install
+```
+
+Then use it as a `provided` dependency with version `1.2.0-SNAPSHOT` and declare OctaMMO as a soft dependency. The existing API version is `2`; this release keeps its current method/event contracts.
+
+## Notes and testing
+
+- Always test recipe and fixer behavior on a staging server with copies of production items.
+- AdvancedEnchantments has version-specific behavior. OctaMMO uses the documented `AEAPI.applyEnchant` method for applying custom enchantments. The GUI reads each definition's `group`, `levels`, and `applies` fields; extraction additionally depends on the data-access method exposed by the installed AE build or the lore fallback.
+- ExcellentEconomy currency transactions require the currency to exist and operations not to be locked by ExcellentEconomy.
+- This source bundle was prepared without Maven installed or dependency repository access in the build environment. Run the Maven command above or use the included GitHub Actions workflow to perform the authoritative dependency-backed compile and test.
+
+
+## External API references
+
+- [AdvancedEnchantments — Plugin API](https://ae.advancedplugins.net/for-developers/plugin-api)
+- [AdvancedEnchantments — Creating Enchantments](https://ae.advancedplugins.net/enchantments/creating-enchantments)
+- [AdvancedEnchantments — Custom Effects](https://ae.advancedplugins.net/for-developers/create-custom-effects)
+- [AdvancedEnchantments — Custom Triggers](https://ae.advancedplugins.net/for-developers/create-custom-effects-1)
+- [AdvancedEnchantments — Custom Targets](https://ae.advancedplugins.net/for-developers/create-custom-effects-2)
+- [AdvancedEnchantments — Plugin Compatibility Issues](https://ae.advancedplugins.net/for-developers/plugin-compatiblity-issues)
+- [ExcellentEconomy — Developer API](https://nightexpressdev.com/excellenteconomy/utility/developer-api/)

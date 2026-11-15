@@ -1,6 +1,8 @@
-# OctaMMO 1.2.0-SNAPSHOT
+# OctaMMO 1.2.0-BETA
 
-OctaMMO is a modular Paper plugin for MMOItems servers. Version `1.2.0-SNAPSHOT` expands the original Altar Forge and public API with a custom enchanting interface, recipe-driven Combine and Crafting Stations, and an MMOItems Item Fixer.
+This BETA update adds a configurable startup banner, a command fallback for enchanting search, authentic AdvancedEnchantments book extraction through AE's own give command, and separate glass-pane GUI layouts for Combine and Crafting. Recipe interactions and item movement are scheduled safely on the main server thread; no GUI animation loops are used.
+
+OctaMMO is a modular Paper plugin for MMOItems servers. Version `1.2.0-BETA` expands the original Altar Forge and public API with a custom enchanting interface, recipe-driven Combine and Crafting Stations, and an MMOItems Item Fixer.
 
 ## Compatibility
 
@@ -30,7 +32,7 @@ mvn -B clean test package
 The plugin jar is generated at:
 
 ```text
-octammo-plugin/target/OctaMMO-1.2.0-SNAPSHOT.jar
+octammo-plugin/target/OctaMMO-1.2.0-BETA.jar
 ```
 
 The jar shades the `octammo-api` module. The API classes are included in the plugin jar and are not shaded from third-party plugins.
@@ -40,7 +42,7 @@ The jar shades the `octammo-api` module. The API classes are included in the plu
 1. Install Paper 1.21.11 and Java 21.
 2. Install MMOItems and MythicLib for MMOItems functionality.
 3. Optionally install AdvancedEnchantments and/or ExcellentEconomy before OctaMMO.
-4. Place `OctaMMO-1.2.0-SNAPSHOT.jar` in the server's `plugins` directory and restart.
+4. Place `OctaMMO-1.2.0-BETA.jar` in the server's `plugins` directory and restart.
 5. Review `plugins/OctaMMO/config.yml`, `recipes/combine.yml`, and `recipes/crafting.yml`.
 6. Restart or run `/octammo reload` after editing plugin configuration files.
 
@@ -62,6 +64,7 @@ The first start creates the default configuration, GUI layouts, language file, a
 | `/octammo crafting` | `octammo.crafting` | true | Open the Crafting Station |
 | `/octammo fixer` | `octammo.fixer` | true | Open the MMOItems Item Fixer |
 | `/octammo enchanting` | `octammo.enchant` | true | Open the custom enchanting GUI |
+| `/octammo search <keyword>` | `octammo.enchant` | true | Submit a search while the enchanting GUI is waiting for input |
 
 Right-clicking an enchanting table also opens the custom enchanting GUI when `modules.custom-enchanting` is enabled. The aliases `/octa` and `/omm` are available for `/octammo`.
 
@@ -86,7 +89,7 @@ The existing public API remains at API version 2. Existing integrations using `O
 
 ### 2. Custom Enchanting
 
-When enabled, interacting with an enchanting table opens a six-row, 54-slot OctaMMO GUI. The input slot is on the left; enchantment entries are displayed on the right. Its bottom controls provide keyword search, tier filtering, a paged enchantment guide, previous/next page navigation, input return, and close. The tier filter cycles through All Tiers, Vanilla, Simple, Unique, Elite, Ultimate, Legendary, Fabled, and Heroic; right-clicking the filter resets it to All Tiers. Search is entered in chat after clicking the spyglass. The guide opens a separate paged catalogue with each loaded custom enchantment's description, group, maximum level, and supported item categories.
+When enabled, interacting with an enchanting table opens a six-row, 54-slot OctaMMO GUI. The input slot is on the left; enchantment entries are displayed on the right. Its bottom controls provide keyword search, tier filtering, a paged enchantment guide, previous/next page navigation, input return, and close. The tier filter cycles through All Tiers, Vanilla, Simple, Unique, Elite, Ultimate, Legendary, Fabled, and Heroic; right-clicking the filter resets it to All Tiers. Search is entered in chat after clicking the spyglass. The pending search state survives a chat plugin closing the inventory, expires after 60 seconds, and returns the input item on cancellation, timeout, quit, or shutdown. If a chat-formatting plugin blocks the captured chat event, use `/octammo search <keyword>` after clicking the search icon. The guide opens a separate paged catalogue with each loaded custom enchantment's description, group, maximum level, and supported item categories.
 
 Vanilla enchantments are discovered through the Bukkit enchantment registry and filtered by `Enchantment.canEnchantItem` for the inserted item. AdvancedEnchantments definitions are read recursively from the plugin's `Enchantments/`, `enchantments/`, or `enchants/` folders, including the modern `Enchantments/<folder>/enchantments.yml` layout. Definitions are grouped by their configured `group` value and filtered against each enchantment's `applies` material/category list (including shortcuts such as `ALL_SWORD`, `ALL_PICKAXE`, `ALL_SPADE`, and `ALL_ARMOR`). The GUI tiers therefore need to match the group names configured on your AE enchantments (for example `SIMPLE`, `UNIQUE`, `ELITE`, `ULTIMATE`, `LEGENDARY`, `FABLED`, and `HEROIC`). Custom enchantments are applied through the documented `AEAPI.applyEnchant(String, int, ItemStack)` method.
 
@@ -106,7 +109,7 @@ enchanting:
       heroic: 10
 ```
 
-Changing enchantment definitions or AE configuration requires `/octammo reload` or a restart. The GUI only lists an enchantment group when the item is inserted. Vanilla applicability is checked by Bukkit. AdvancedEnchantments applicability remains governed by the installed AE configuration and its own API behavior.
+Changing enchantment definitions or AE configuration requires `/octammo reload` or a restart. The GUI only lists an enchantment group when the item is inserted. Each refresh identifies the current item as MMOItems `TYPE/ID` or a vanilla/non-MMOItems item. Vanilla applicability is checked by Bukkit, including Vanilla conflict rules such as Sharpness versus Smite. AdvancedEnchantments applicability is checked against the installed AE `applies` rules and MMOItems identity; configured AE conflicts are also checked. Incompatible entries are shown in red and cannot be applied.
 
 ### 3. Combine Station
 
@@ -149,7 +152,7 @@ currency:
 
 `id` must be the actual ExcellentEconomy currency ID, not its display name or symbol. OctaMMO uses ExcellentEconomy's service API and currency-specific `getBalance(Player, String)` / `withdraw(Player, String, double)` operations. It does not route these recipe costs through Vault's primary economy provider.
 
-The shipped `crafting.yml` contains a working vanilla-material example with no currency requirement, so the menu is usable immediately. Add the optional currency section to any recipe after replacing `octacoin` with an existing currency ID. If the currency is not registered or the provider is unavailable, the craft is refused and the ingredients are not consumed.
+The workstation GUIs use separate colored-glass frames and static recipe/output panels. Their select, insert, fail, and success anvil sounds can be changed in `guis/combine.yml` and `guis/crafting.yml`. No GUI animation loop is used. The shipped `crafting.yml` contains a working vanilla-material example with no currency requirement, so the menu is usable immediately. Add the optional currency section to any recipe after replacing `octacoin` with an existing currency ID. If the currency is not registered or the provider is unavailable, the craft is refused and the ingredients are not consumed.
 
 ### 5. MMOItems Item Fixer
 
@@ -161,7 +164,7 @@ Open with `/octammo fixer`. The GUI provides two operations:
 - Attempts to read the custom enchant map from an ItemStack-based public AE API getter. If the installed AE API does not expose such a getter, the fixer falls back to matching the enchant definition names/IDs against item lore.
 - Rebuilds the base MMOItems template from the original `MMOITEMS_ITEM_TYPE` and `MMOITEMS_ITEM_ID` tags.
 - Produces a clean base item; random stats, sockets, upgrades, and other instance-specific values are not guaranteed to be retained by extraction.
-- Creates one AdvancedEnchantments enchanted book per detected enchantment, applying the enchantment through AEAPI to an `ENCHANTED_BOOK` stack (the standard custom enchant-book item type in AdvancedEnchantments configuration).
+- Requests each extracted book from AdvancedEnchantments through its documented `/ae give <player> <enchantment> <level>` command. OctaMMO captures the exact item AdvancedEnchantments gives, including the book material, NBT/PDC, lore, success rate, destroy rate, and version-specific metadata configured by the server. It does not manufacture a substitute enchanted book.
 - Does not consume the input if the item, enchantments, template, or book output cannot be prepared.
 
 **Rebuild Item Lore**
@@ -175,7 +178,11 @@ Open with `/octammo fixer`. The GUI provides two operations:
 
 **Important data behavior:** Item Fixer uses MMOItems' own data-transfer pipeline rather than copying arbitrary NBT or taking a new pristine template. The old lore is intentionally not copied; other values follow MMOItems' `item-revision.keep-data` options. The separate **Extract AE Enchants** action deliberately creates a clean base template and extracted enchanted books, so item-instance data such as gems, upgrades, and random stats may not survive extraction. Test both operations on copies before enabling the fixer for players. The fixer processes one item at a time.
 
-### 6. MMOItems Interaction Lock
+### 6. Startup Banner
+
+The enable banner prints a static OCTAMMO ASCII wordmark, the resolved plugin version, the server version, and a summary of optional integrations. Configure it under `startup-banner` in `config.yml`. It does not use animations or repeating tasks.
+
+### 7. MMOItems Interaction Lock
 
 When enabled, the interaction listener prevents MMOItems items in the main/off hand from placing blocks, breaking blocks, tilling farmland, or creating dirt paths. The behavior is controlled by `interact-lock:` in `config.yml`; players with `octammo.interact.bypass` are exempt.
 
@@ -185,7 +192,7 @@ When enabled, the interaction listener prevents MMOItems items in the main/off h
 |---|---|
 | `config.yml` | Module toggles, enchanting costs, fixer behavior, interaction lock, Altar Forge settings |
 | `lang/en.yml` | English chat messages and GUI text |
-| `guis/*.yml` | Existing Altar Forge GUI layouts |
+| `guis/*.yml` | Enchanting, Item Fixer, Combine, Crafting, and Altar Forge GUI titles, decoration, slot layouts, and workstation sounds |
 | `recipes/combine.yml` | Combine recipes |
 | `recipes/crafting.yml` | Crafting recipes and currency costs |
 | `upgrades/*.yml` | Altar Forge stations and paths |
@@ -200,22 +207,21 @@ The public API is provided by the `octammo-api` Maven module and is included in 
 mvn -pl octammo-api install
 ```
 
-Then use it as a `provided` dependency with version `1.2.0-SNAPSHOT` and declare OctaMMO as a soft dependency. The existing API version is `2`; this release keeps its current method/event contracts.
+Then use it as a `provided` dependency with version `1.2.0-BETA` and declare OctaMMO as a soft dependency. The existing API version is `2`; this release keeps its current method/event contracts.
 
 ## Validation status for this source package
 
-- Java parser check: 77 source files parsed with no syntax diagnostics. This is a syntax-only check and does not perform Java type checking against Paper/MMOItems dependencies.
-- YAML resources: all 9 shipped `.yml` files parsed successfully.
-- Maven project descriptors: all 3 `pom.xml` files parsed successfully.
-- Maven compilation and JUnit execution: not run in the packaging environment because Apache Maven is not installed there.
-- Live Paper-server integration: not yet verified against your exact Paper, MMOItems, AdvancedEnchantments, and ExcellentEconomy builds.
+- YAML resource parsing and Maven descriptor parsing are checked before packaging.
+- Java source syntax is checked separately from dependency-backed compilation.
+- Maven compilation and JUnit execution must be run with JDK 21 and Maven against the configured Paper and optional-plugin repositories.
+- Live Paper-server integration still requires testing against the exact Paper, MMOItems, AdvancedEnchantments, and ExcellentEconomy builds installed on your server.
 
 The GitHub Actions workflow runs `mvn -B clean test package` on pushes and pull requests. Treat the plugin as a staging build until that workflow or a local Maven build succeeds and the GUI operations have been tested on a copy of your server data.
 
 ## Notes and testing
 
 - Always test recipe and fixer behavior on a staging server with copies of production items.
-- AdvancedEnchantments has version-specific behavior. OctaMMO uses the documented `AEAPI.applyEnchant` method for applying custom enchantments. The GUI reads each definition's `group`, `levels`, and `applies` fields; extraction additionally depends on the data-access method exposed by the installed AE build or the lore fallback.
+- AdvancedEnchantments has version-specific behavior. OctaMMO uses the documented `AEAPI.applyEnchant` method for applying custom enchantments. The GUI reads each definition's `group`, `levels`, `applies`, and `conflicts` fields. Extraction reads enchant levels through the supported integration path and asks AdvancedEnchantments to create each genuine enchanted book with the configured `/ae give` command.
 - ExcellentEconomy currency transactions require the currency to exist and operations not to be locked by ExcellentEconomy.
 - This source bundle was prepared without Maven installed or dependency repository access in the build environment. Run the Maven command above or use the included GitHub Actions workflow to perform the authoritative dependency-backed compile and test.
 
@@ -237,10 +243,14 @@ The following files are generated in `plugins/OctaMMO/guis/` and can be edited w
 
 - `enchanting.yml` — title, glass-pane decoration, input/control slots, and enchantment grid slots.
 - `item-fixer.yml` — title, glass-pane decoration, and input/action slots.
+- `combine.yml` — Combine Forge title, glass-pane palette, recipe slots, input slots, and action slots.
+- `crafting.yml` — Crafting Atelier title, glass-pane palette, recipe slots, input slots, and action slots.
 - `default-upgrade.yml`, `path-select.yml`, and `confirm.yml` — Altar Forge layouts.
 
 All slot values use the Bukkit inventory index range `0-53`. Keep interactive slots unique and do not overlap the enchantment grid with the control slots.
 
-The enchanting input supports normal cursor placement, drag-and-drop into the configured input slot, shift-click from the player inventory, number-key swaps, and offhand swaps. Search is entered in chat after clicking the search icon.
+The enchanting input supports normal cursor placement, drag-and-drop into the configured input slot, shift-click from the player inventory, number-key swaps, and offhand swaps. Search is entered in chat after clicking the search icon; `/octammo search <keyword>` is available as a command fallback while a search prompt is active.
+
+Crafting and Combine use separate configurable GUI layouts. Both use static glass-pane frames and decorative workbench sections; no per-tick GUI animation or repeating animation task is scheduled. Ingredient insertion, recipe selection, and successful processing use short anvil sounds.
 
 Enchantment entries are checked against the inserted item's Bukkit material and, when MMOItems is installed, its MMOItems `TYPE/ID`. Incompatible entries are shown in red and cannot be applied. Vanilla enchantment conflicts are checked using Bukkit's enchantment conflict rules; AdvancedEnchantments conflicts are read from each enchantment's `conflicts` setting when present.

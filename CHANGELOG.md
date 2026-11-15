@@ -49,3 +49,33 @@
 - Added MMOItems TYPE/ID-aware AdvancedEnchantments `applies` matching and visible item identity information.
 - Incompatible enchantments now appear red and cannot be applied; vanilla conflicts use Bukkit conflict rules and AE conflicts use configured `conflicts` lists.
 - Added safer parsing for both list and comma-separated AdvancedEnchantments conflict definitions.
+
+
+## [1.2.0-BETA] - 2026-11-15
+
+### Added
+- Added a configurable startup banner that prints the full OCTAMMO ASCII wordmark, plugin version, server version, and detected hook status.
+- Added `/octammo search <keyword>` as a fallback path when chat plugins intercept or suppress the enchanting search chat event; the prompt timeout is configurable in `config.yml`.
+- Added separate `guis/combine.yml` and `guis/crafting.yml` files for workstation titles, primary/accent glass-pane decoration, recipe entries, ingredient slots, output, action controls, and configurable sounds.
+- Added concise anvil sounds for recipe selection, ingredient insertion, failed validation, and successful crafting/combining.
+
+### Fixed
+- Replaced the previous synthetic AdvancedEnchantments book construction with AE's own `/ae give <player> <enchantment> <level>` command. OctaMMO captures the exact book item created by AE instead of applying the enchant to a newly constructed generic book.
+- Added an inventory-delta capture/restore routine so temporarily generated AE books are removed from the player's inventory and delivered through the Item Fixer transaction only after all books have been prepared.
+- Ensured already prepared AE books are returned if a later extraction in the same operation fails; the source MMOItem remains in the GUI and is not consumed.
+- Reworked recipe input clicks, shift-clicks, and single-slot drags to apply inventory changes on the next server tick after the click/drag transaction is cancelled.
+- Added explicit input validation for MMOItems in the Item Fixer and safe cursor handling for click and drag operations.
+- Preserved pending search state when another plugin closes the enchanting view, added a `/octammo search <keyword>` fallback, added a one-minute prompt timeout, and returned held input safely on cancel, new GUI sessions, quit, or plugin shutdown.
+- Updated the Item Fixer AE book failure message to explain the required free inventory slot and AE command availability.
+
+### Performance and safety
+- Kept all workbench GUIs static; no repeating animation tasks or per-tick GUI updates were added.
+- Recipe lists are rendered only when a menu is created or a page is changed.
+- Anvil sound type, volume, pitch, and accent-pane material are read from each workstation GUI YAML file.
+- Enchant compatibility checks build a single per-refresh conflict index rather than rescanning every loaded AE enchant for each displayed entry.
+- Recipe validation and currency withdrawal occur once per confirmed transaction, after ingredient checks.
+- Added a startup banner toggle and hook-summary toggle under `startup-banner`.
+
+### Verification notes
+- AdvancedEnchantments documents `/ae give <player> <enchantment> <level>` as the command that gives a custom enchanted book. Runtime capture behavior must still be checked with the exact AE version and book configuration on the target server.
+- Maven compilation and live Paper-server testing remain required before production deployment.

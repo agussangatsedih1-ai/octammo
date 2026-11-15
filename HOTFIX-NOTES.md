@@ -1,29 +1,34 @@
-# OctaMMO 1.2.0-SNAPSHOT GUI Interaction Hotfix
+# OctaMMO 1.2.0-BETA Hotfix Notes
 
-This source revision addresses the reported GUI input and compatibility problems.
+## Startup identity
 
-## Changes
+- Prints a static, five-line OCTAMMO wordmark during enable.
+- Shows the resolved plugin version, Bukkit/Paper server version, and optional-hook status.
+- The banner can be disabled or edited through `startup-banner` in `config.yml`.
+- No animation, repeating task, or delayed startup effect is used.
 
-- Enchanting and Item Fixer now accept click-to-place, click-to-take, drag-and-drop into the input slot, shift-click from the player inventory, number-key swaps, and offhand swaps.
-- GUI control and decoration slots remain protected from item movement.
-- Cursor updates use the active InventoryView instead of deprecated InventoryClickEvent cursor mutation.
-- Enchanting and Item Fixer now have configurable glass-pane frames.
-- GUI titles, decoration material/name/lore, and key slot positions are stored in `plugins/OctaMMO/guis/enchanting.yml` and `plugins/OctaMMO/guis/item-fixer.yml`.
-- Enchant entries display MMOItems TYPE/ID detection when MMOItems is installed.
-- AdvancedEnchantments `applies` rules are checked against both Bukkit material and MMOItems type/ID.
-- Incompatible enchantments are displayed in red and blocked from being applied. Vanilla conflicts use Bukkit's conflict API; AE conflicts use the `conflicts` setting in enchant definitions.
+## Enchanting and Item Fixer
 
-## Build
+- Input click, shift-click, number-key, offhand, and drag operations apply after the inventory event has completed.
+- The enchant search supports Paper chat input and `/octammo search <keyword>` after clicking Search in the GUI. The pending state survives external inventory closure, expires after one minute, and returns input on cancel, timeout, quit, new session, or shutdown.
+- Search updates the displayed list, resets the page, and restores the GUI if another chat handler closed it.
+- Enchant compatibility is checked against the inserted material, MMOItems Type/ID, AE `applies` rules, current Vanilla enchant conflicts, and configured AE conflicts. Incompatible options are red and cannot be applied.
+- Extraction requests each enchanted book from AdvancedEnchantments using the configured `/ae give` command. OctaMMO captures and returns the item AE actually generated instead of manufacturing a replacement book.
+- A failed book-generation step leaves the original MMOItems input untouched.
 
-Run from the project root:
+## Combine and Crafting
 
-```bash
-mvn clean test package
-```
+- Recipe index and detail screens use configurable tinted-glass frames and separate visual accents for each workstation.
+- Recipe, page and item actions use short anvil sounds. Successful processing uses the anvil-use sound. Sound type, volume and pitch are configurable in the two workstation GUI YAML files.
+- No animated GUI tasks or repeating inventory updates are used.
+- Ingredient insertion, hotbar and offhand handling are deferred until after the inventory event and revalidated before moving stacks.
 
-## Verification status
+## Configuration
 
-- YAML files parsed successfully.
-- Maven POM files parsed successfully.
-- Java delimiter/syntax-shape scan completed without unmatched braces/brackets.
-- A full Maven compile and live Paper-server test were not run in the build environment. Do not treat this ZIP as a server-tested release until it compiles and is tested with the exact Paper, MMOItems, MythicLib, AdvancedEnchantments, and ExcellentEconomy versions used by the server.
+- Enchanting, Item Fixer, Combine and Crafting layouts are separate files in `plugins/OctaMMO/guis/`.
+- Startup banner, enchanting search timeout, and the AdvancedEnchantments book command are configurable in `config.yml`.
+- All shipped messages, GUI labels, lore, configuration comments and documentation are English.
+
+## Verification boundary
+
+YAML and Maven descriptor validation can be performed on the source bundle. A full Maven compile and a live server test still must be run with the actual Paper, MMOItems, MythicLib, AdvancedEnchantments and ExcellentEconomy versions used by the target server. This source is a BETA build, not a claim of a server-certified release.
